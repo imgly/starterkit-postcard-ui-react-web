@@ -56,7 +56,6 @@ src/
 ├── imgly/
 │   ├── CreativeEditor.tsx
 │   ├── CreativeEngine.tsx
-│   ├── PremiumTemplateUtilities.ts
 │   ├── contexts/
 │   │   ├── EngineContext.tsx
 │   │   ├── SelectionContext.tsx
