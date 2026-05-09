@@ -14,7 +14,7 @@ const EMPTY_RESULT = {
   nextPage: undefined
 };
 
-let DEFAULT_UNSPLASH_API_URL = import.meta.env.VITE_UNSPLASH_API_URL || '';
+let DEFAULT_UNSPLASH_API_URL = '';
 
 
 function createUnsplashSource(engine: CreativeEngine) {
