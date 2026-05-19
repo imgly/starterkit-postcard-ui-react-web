@@ -9,6 +9,7 @@ import { useState } from 'react';
 import type CreativeEngine from '@cesdk/engine';
 import type { Configuration } from '@cesdk/engine';
 import {
+  ImageColorsAssetSource,
   ColorPaletteAssetSource,
   DemoAssetSources,
   StickerAssetSource,
@@ -49,6 +50,7 @@ const App: React.FC<AppProps> = ({ engineConfig }) => {
     engine.editor.setSetting('page/title/show', false);
 
     // Add default asset sources via plugins
+    await engine.addPlugin(new ImageColorsAssetSource());
     await engine.addPlugin(new ColorPaletteAssetSource());
     await engine.addPlugin(new TypefaceAssetSource());
     await engine.addPlugin(new TextAssetSource());
