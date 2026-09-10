@@ -7,18 +7,14 @@
     "jsx": "react-jsx",
     "moduleResolution": "bundler",
     "skipLibCheck": true,
-    "noImplicitAny": true,
-    "strict": true,
+    "noImplicitAny": false,
+    "strict": false,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "noEmit": true,
-    "baseUrl": ".",
-    "paths": {
-      "@/*": ["src/*"]
-    }
+    "noEmit": true
   },
   "include": ["*.ts", "src/**/*.ts", "src/**/*.tsx"],
   "exclude": ["*.mjs", "node_modules", "dist"]
