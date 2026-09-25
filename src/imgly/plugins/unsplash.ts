@@ -62,14 +62,15 @@ function createUnsplashSource(engine: CreativeEngine) {
       );
     },
     async findAssets(queryData: AssetQueryData): Promise<AssetsQueryResult> {
-      // Unsplash pagination starts at 1, so map incoming page 0 to page 1.
-      const page = queryData.page === 0 ? 1 : queryData.page;
+      const { page, perPage } = queryData;
+      // Unsplash counts pages from 1, CE.SDK from 0.
+      const unsplashPage = page + 1;
 
       if (queryData.query) {
         const response = await unsplash.search.getPhotos({
           query: queryData.query,
-          page,
-          perPage: queryData.perPage,
+          page: unsplashPage,
+          perPage,
           orderBy: 'relevant'
         });
         if (response.type === 'success') {
@@ -80,7 +81,7 @@ function createUnsplashSource(engine: CreativeEngine) {
 
             total,
             currentPage: page,
-            nextPage: page + 1 <= total_pages ? page + 1 : undefined
+            nextPage: unsplashPage < total_pages ? page + 1 : undefined
           };
         } else if (response.type === 'error') {
           throw new Error(response.errors[0]);
@@ -90,13 +91,13 @@ function createUnsplashSource(engine: CreativeEngine) {
       } else {
         const response = await unsplash.photos.list({
           orderBy: OrderBy.LATEST,
-          page,
-          perPage: queryData.perPage
+          page: unsplashPage,
+          perPage
         });
 
         if (response.type === 'success') {
           const { results, total } = response.response;
-          const totalFetched = (page - 1) * queryData.perPage + results.length;
+          const totalFetched = page * perPage + results.length;
           const nextPage = totalFetched < total ? page + 1 : undefined;
           const assets = results.map((asset) => translateToAssetResult(asset));
 
@@ -145,6 +146,8 @@ function createUnsplashSource(engine: CreativeEngine) {
 }
 
 interface UnsplashImage {
+  /** Only the search endpoint returns tags. */
+  tags?: { title: string }[];
   id: string;
   urls: {
     full: string;
@@ -181,7 +184,6 @@ function translateToAssetResult(image: UnsplashImage): AssetResult {
     locale: 'en',
     label: image.description ?? image.alt_description ?? undefined,
 
-    // @ts-ignore
     tags: image.tags ? image.tags.map((tag) => tag.title) : undefined,
 
     meta: {
