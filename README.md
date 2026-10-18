@@ -33,6 +33,9 @@ npm install
 ```bash
 # Start development server
 npm run dev
+
+# Start with local CE.SDK assets (monorepo only)
+npm run dev:local
 ```
 
 ### Build
@@ -40,6 +43,9 @@ npm run dev
 ```bash
 # Production build
 npm run build
+
+# Build with local CE.SDK assets (monorepo only)
+npm run build:local
 ```
 
 ## Project Structure
@@ -113,6 +119,12 @@ Owns all React UI that is specific to the postcard use-case:
 | ----- | ------- |
 | `@/*` | `src/*` |
 
+### Type checking
+
+```bash
+npm run check:syntax  # TypeScript strict-mode type check
+```
+
 ## Key Components
 
 ### Contexts
@@ -170,17 +182,34 @@ All components use CSS modules for scoped styling. Global styles are defined in 
 - `npm run build` - Production build
 - `npm run preview` - Preview production build
 - `npm run check:syntax` - TypeScript strict-mode type checking
+- `npm run check:format` - Prettier formatting check
+- `npm run check:lint` - ESLint checking
+- `npm run check:all` - Run all checks
+- `npm run fix:all` - Auto-fix formatting and linting issues
 
 ## Demo Assets
 
-The demo assets for this starter kit load from the IMG.LY CDN by default, and
-`.env.example` links a zip with them. To host them yourself, upload the
-extracted files to your own server or CDN and set `VITE_DEMO_ASSETS_BASE_URL`
-in `.env`:
+The demo assets for this starter kit load from the IMG.LY CDN by default —
+nothing to configure. If you want to own them — edit them, meet compliance
+requirements, or remove the CDN dependency for production — eject them
+(the archive contains only this kit's files):
+
+```bash
+# Download this starter kit's demo assets
+curl -O https://staticimgly.com/imgly/cesdk-web-examples-data/1.82.3-rc.0/starterkit-postcard-ui/demo-assets.zip
+unzip demo-assets.zip -d demo-assets
+rm demo-assets.zip
+```
+
+Upload the extracted files to your own server or CDN, then point the app
+at them via `.env`:
 
 ```bash
 VITE_DEMO_ASSETS_BASE_URL=https://cdn.yourdomain.com/demo-assets
 ```
+
+The default URL is the `DEMO_ASSETS_BASE_URL` constant in `src/app/contexts/EditorContext.tsx` if you
+prefer changing it in code.
 
 The demo assets are intended for development and prototyping — replace
 them with your own content or licensed stock assets before shipping to

@@ -51,6 +51,7 @@ export const EngineProvider = ({
       setIsLoaded(false);
     };
     // We do not want to rerender when the config changes. Config should never change!
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   if (!engine) {
