@@ -11,6 +11,7 @@
 
 import { createRoot } from 'react-dom/client';
 import App from './app/App';
+import '@fontsource-variable/inter';
 
 // ============================================================================
 // Configuration
