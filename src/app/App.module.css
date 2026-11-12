@@ -107,7 +107,8 @@
   --color-bg: #f8f9fc;
   --color-white: #ffffff;
   --font-family:
-    'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    'Inter Variable', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI',
+    Roboto, sans-serif;
   --border-radius: 8px;
   --shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
