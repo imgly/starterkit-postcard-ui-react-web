@@ -15,6 +15,10 @@ Built to facilitate optimal post- and greeting-card design, from changing accent
 - **Real-time Preview**: See your changes instantly in the canvas
 - **Dual-Page Editing**: Separate front and back page customization
 
+## Features and This Kit
+
+This kit builds its own UI on the engine, so `cesdk.features` does not apply to it: features drive only the CE.SDK UI. Gate the controls in your own code.
+
 ## Getting Started
 
 ### Prerequisites
@@ -47,21 +51,21 @@ npm run build
 ```
 src/
 ├── imgly/                        # CE.SDK glue layer (reusable)
+│   ├── index.ts                  # Editor initialization function
 │   ├── constants.ts              # Block names, asset source ids, font subset
-│   ├── contexts/                 # Engine, selection, and single-page-mode contexts
-│   ├── hooks/                    # Reactive state bridges (UseEditMode, UseHistory, …)
-│   │   └── useEditorActions.ts   # Thin hook — binds engine to pure action functions
-│   ├── actions/                  # All engine mutations as pure functions
-│   │   ├── assets.ts             # findShapes, findStickers, findTypefaces, …
-│   │   ├── block.ts              # deleteSelected, setEditMode, resetCrop, …
-│   │   ├── export.ts             # exportToPdf (try/finally hardened), downloadBlob
-│   │   ├── history.ts            # undo, redo
-│   │   ├── pageStyle.ts          # setColorByBlockName, setFontByBlockName, …
-│   │   └── text.ts               # addText, replaceFontOnSelection, …
-│   ├── utils/                    # ColorUtilities, CreativeEngineUtils, UnsplashSource, ImageColorsSource
-│   └── index.ts                  # Public surface
+│   ├── demo-assets.ts            # Demo asset URLs
+│   ├── postcard-catalog.ts       # Postcard templates
+│   ├── utils.ts                  # Color, placement, export and asset lookup helpers
+│   ├── config/
+│   │   └── actions.ts            # Postcard actions on the engine's Actions API
+│   └── plugins/
+│       ├── image-colors.ts       # Image colors asset source
+│       └── unsplash.ts           # Unsplash asset source
 ├── app/                          # Postcard UI (application-specific)
-│   ├── contexts/                 # EditorContext (template/scene/step), PageSettingsContext
+│   ├── App.tsx                   # Root component: providers and the editor shell
+│   ├── App.module.css            # App styles
+│   ├── contexts/                 # Engine, editor, page settings, selection and single-page-mode contexts
+│   ├── hooks/                    # Reactive state bridges (useEditMode, useHistory, …)
 │   ├── components/               # Generic UI primitives (IconButton, Dropdown, …)
 │   ├── features/                 # Editor panels grouped by feature
 │   │   ├── text/                 # AddTextSecondary, ChangeFontSecondary, …
@@ -85,27 +89,28 @@ The codebase is organized into two clearly separated layers.
 
 ### `src/imgly/` — CE.SDK glue (reusable)
 
-Encapsulates everything that touches the CE.SDK engine:
+Encapsulates the engine setup and the postcard operations:
 
-- **`contexts/`** — React contexts for engine lifecycle (`EngineContext`), block selection (`SelectionContext`), and single-page-focus mode (`SinglePageModeContext`).
-- **`hooks/`** — Reactive state bridges (`UseEditMode`, `UseHistory`, `UseImageUpload`, `UseSelectedProperty`). `useEditorActions()` is a thin ergonomic wrapper that binds the engine from context to the pure action functions below.
-- **`actions/`** — All engine **mutations** as plain, testable functions (`addText(engine, …)`, `deleteSelected(engine)`, `exportToPdf(engine, …)`, etc.). Pure functions: no React imports, no context reads — the engine is always an explicit parameter.
-- **`utils/`** — Stateless helpers (`ColorUtilities`, `CreativeEngineUtils`) and engine-native asset sources (`UnsplashSource`, `ImageColorsSource`).
+- **`index.ts`** — `initPostcardEditor(engine)`: editor settings, role and scopes, asset sources, and the postcard actions.
+- **`config/actions.ts`** — Registers the postcard operations (`addText`, `replaceFontOnSelection`, `exportToPdf`, `setColorByBlockName`, `setTextSizeByBlockName`, `setFontByBlockName`) on the engine's Actions API.
+- **`plugins/`** — Engine-native asset sources (`unsplash.ts`, `image-colors.ts`).
+- **`utils.ts`** — Stateless helpers: color conversion, block placement, download, and asset lookups (`findShapes`, `findStickers`, `findTypefaces`, …).
 - **`constants.ts`** — Shared constants: `BLOCK_NAMES`, `ASSET_SOURCES`, `FONT_SUBSET`.
 
 ### `src/app/` — Postcard UI (application-specific)
 
 Owns all React UI that is specific to the postcard use-case:
 
-- **`contexts/`** — Domain state: `EditorContext` (template selection, scene loading, step management) and `PageSettingsContext` (front/back colors, fonts, sizes).
-- **`components/`** — Generic, reusable UI primitives (buttons, dropdowns incl. `ColorDropdown`, color pickers, layout primitives). No engine calls.
-- **`features/`** — Editor panels grouped feature-first (`text/`, `image/`, `shape/`, `sticker/`, `blocks/`). Each panel reads engine state via `imgly` hooks and triggers changes via `useEditorActions()`.
+- **`contexts/`** — Engine lifecycle (`EngineContext`), domain state (`EditorContext` for template selection, scene loading and steps, `PageSettingsContext` for front/back colors, fonts and sizes), block selection (`SelectionContext`) and single-page-focus mode (`SinglePageModeContext`).
+- **`hooks/`** — Reactive state bridges (`useEditMode`, `useHistory`, `useImageUpload`, `useSelectedProperty`).
+- **`components/`** — Generic, reusable UI primitives (buttons, dropdowns incl. `ColorDropdown`, color pickers, layout primitives).
+- **`features/`** — Editor panels grouped feature-first (`text/`, `image/`, `shape/`, `sticker/`, `blocks/`).
 - **`layout/`** — App shell and chrome: `PostcardUI` (composition root that switches between steps), `ProcessNavigation` (the Style → Design → Write stepper), and `PageToolbar` (front/back page toolbars).
 - **`steps/`** — One screen per wizard step (e.g. `ChooseTemplateStep`, the "Style" step). The steps themselves are listed in `ALL_STEPS` in `EditorContext`.
 
-### The golden rule
+### Postcard actions
 
-**UI components never call `engine.*` to mutate state.** They call `imgly/actions` functions via `useEditorActions()`. This keeps mutations testable in isolation (plain functions, no React), and makes it obvious where all engine side-effects live.
+The postcard-specific operations live in `src/imgly/config/actions.ts`, and UI components run them with `engine.actions.run(...)`, for example `engine.actions.run('exportToPdf', pageId)`. Common operations such as `history.undo` or `selection.delete` are engine defaults and need no registration.
 
 ### Path aliases
 
